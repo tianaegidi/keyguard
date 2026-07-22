@@ -152,7 +152,60 @@
           <article><span>03</span><h3>Protect</h3><p>Offer practical actions instead of another warning to dismiss.</p></article>
         </div>
       </section>
+
+      <section class="cloudflare-section" aria-labelledby="cloudflare-title">
+        <div class="cloudflare-intro">
+          <p class="cloudflare-kicker"><span aria-hidden="true">CF</span> Cloudflare architecture</p>
+          <h2 id="cloudflare-title">Built for the edge.<br />Blind to the secret.</h2>
+          <p>Encryption stays in the browser. Cloudflare delivers the experience and, in the full product, would coordinate one-time access without receiving a plaintext API key.</p>
+        </div>
+
+        <div class="stack-columns">
+          <div class="stack-column">
+            <div class="stack-heading"><span>Implemented in this prototype</span><strong>NOW</strong></div>
+            <article class="product-card">
+              <div class="product-mark">W</div>
+              <div><h3>Cloudflare Workers</h3><p>The edge entry point serves the app and applies strict security and privacy headers.</p></div>
+            </article>
+            <article class="product-card">
+              <div class="product-mark">A</div>
+              <div><h3>Workers Static Assets</h3><p>The browser experience is bundled with Vite and connected through the Worker’s asset binding.</p></div>
+            </article>
+            <article class="product-card">
+              <div class="product-mark">&gt;_</div>
+              <div><h3>Wrangler</h3><p>Generates Worker types, validates configuration, builds the project, and provides the deployment path.</p></div>
+            </article>
+          </div>
+
+          <div class="stack-column future-stack">
+            <div class="stack-heading"><span>Full backend architecture</span><strong>NEXT</strong></div>
+            <article class="product-card">
+              <div class="product-mark">W</div>
+              <div><h3>Workers API</h3><p>Receives only encrypted payloads and handles create, claim, and expiration requests at the edge.</p></div>
+            </article>
+            <article class="product-card">
+              <div class="product-mark">DO</div>
+              <div><h3>Durable Objects</h3><p>Provides atomic one-time claiming, ciphertext storage, and automatic expiration so two viewers cannot reveal the same secret.</p></div>
+            </article>
+            <article class="product-card compact-card">
+              <div class="product-mark">T</div>
+              <div><h3>Turnstile + Rate Limiting</h3><p>Protects link creation and reveal endpoints from bots and automated abuse.</p></div>
+            </article>
+            <article class="product-card compact-card">
+              <div class="product-mark">O</div>
+              <div><h3>Workers Observability</h3><p>Tracks reliability and failures while deliberately excluding keys, ciphertext, and passwords from logs.</p></div>
+            </article>
+          </div>
+        </div>
+
+        <div class="architecture-flow" aria-label="Planned encrypted sharing data flow">
+          <span><strong>01</strong>Browser encrypts</span><i>→</i><span><strong>02</strong>Worker transports ciphertext</span><i>→</i><span><strong>03</strong>Durable Object allows one claim</span><i>→</i><span><strong>04</strong>Browser decrypts</span>
+        </div>
+        <p class="deployment-note">The public judge preview is currently delivered through GitHub Pages while Cloudflare account authentication is restored. The Worker implementation and deployment configuration are included in the repository.</p>
+      </section>
     </main>
+
+    <footer class="site-footer"><span class="brand-mark small" aria-hidden="true">K</span><span>KeyGuard</span><span>Secrets should travel encrypted, or not at all.</span></footer>
 
     <dialog id="recipient-dialog" class="recipient-dialog">
       <div id="recipient-content"></div>
