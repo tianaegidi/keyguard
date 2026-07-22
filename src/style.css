@@ -116,14 +116,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .generation-card .provider-danger-note { margin: 11px 0 0; color: #a54b3c; }
 .step-label { color: #7d8b95; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
 
-.extension { position: absolute; z-index: 2; top: 16px; right: 30px; width: 370px; min-height: 625px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #aab8c4; border-radius: 14px; background: white; box-shadow: 0 22px 65px rgba(27,45,60,.26); opacity: 0; transform: translateY(-12px) scale(.98); transform-origin: top right; transition: opacity .18s ease, transform .18s ease; }
+.extension { position: absolute; z-index: 2; top: 16px; right: 30px; width: 370px; height: 625px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #aab8c4; border-radius: 14px; background: white; box-shadow: 0 22px 65px rgba(27,45,60,.26); opacity: 0; transform: translateY(-12px) scale(.98); transform-origin: top right; transition: opacity .18s ease, transform .18s ease; }
 .extension[hidden] { display: none; }
 .extension.is-visible { opacity: 1; transform: translateY(0) scale(1); }
 .extension::before { content: ""; position: absolute; top: -8px; right: 43px; width: 14px; height: 14px; transform: rotate(45deg); border-left: 1px solid #aab8c4; border-top: 1px solid #aab8c4; background: white; }
 .extension-header { min-height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #e5eaee; }
 .extension-brand { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .prototype-badge { padding: 5px 7px; border-radius: 6px; background: #f0f3f5; color: #6e7d87; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-.extension-state { flex: 1; padding: 22px 20px 16px; }
+.extension-state { flex: 1; min-height: 0; overflow-y: auto; padding: 22px 20px 16px; }
 .extension-state[hidden] { display: none; }
 .extension-state h2 { margin: 3px 0 10px; font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", sans-serif; font-size: 25px; letter-spacing: -.035em; }
 .extension-state > p:not(.state-kicker) { color: var(--ink-soft); font-size: 13px; line-height: 1.55; }
@@ -177,6 +177,24 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .panel-input { width: 100%; margin: 0 0 13px; padding: 10px 11px; border: 1px solid #becbd4; border-radius: 8px; background: white; outline: 0; font-size: 12px; }
 .panel-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(36,84,230,.11); }
 .panel-status { margin-top: 12px !important; padding: 10px; border-radius: 8px; background: #f2f5f7; color: #60717d !important; font-size: 10px !important; line-height: 1.4 !important; }
+.crypto-recipe { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: -4px 0 17px; }
+.crypto-recipe span { display: grid; gap: 2px; padding: 9px; border: 1px solid #dce4e9; border-radius: 8px; background: #f8fafb; color: #71808b; font-size: 8px; line-height: 1.3; }
+.crypto-recipe span:last-child { grid-column: 1 / -1; }
+.crypto-recipe strong { color: var(--ink); font-size: 10px; }
+.unlock-section { margin-top: 22px; padding-top: 19px; border-top: 1px dashed #c8d4dc; }
+.unlock-section > p { margin: 0 0 12px; color: var(--ink-soft); font-size: 10px; line-height: 1.45; }
+.unlock-section .unlock-heading { margin-bottom: 4px; color: var(--ink); font-size: 12px; font-weight: 850; }
+.file-picker { display: block; margin: 12px 0 14px; padding: 10px 11px; overflow: hidden; border: 1px dashed #9eb0bc; border-radius: 8px; background: #f8fafb; color: var(--blue); font-size: 10px; font-weight: 800; text-align: center; cursor: pointer; text-overflow: ellipsis; white-space: nowrap; }
+.file-picker:hover { border-color: var(--blue); background: var(--blue-pale); }
+.file-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.recovered-file { display: grid; grid-template-columns: 27px 1fr auto; align-items: center; gap: 8px; margin-top: 10px; padding: 10px; border: 1px solid #a8dbc0; border-radius: 9px; background: var(--mint); }
+.recovered-file[hidden] { display: none; }
+.recovered-file div { display: grid; gap: 2px; min-width: 0; }
+.recovered-file strong { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.recovered-file small { color: var(--green); font-size: 8px; }
+.recovered-check { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; background: white; color: var(--green); font-weight: 900; }
+.recovered-file button { padding: 6px 7px; border: 1px solid #82c5a2; border-radius: 6px; background: white; color: var(--green); font-size: 8px; font-weight: 850; cursor: pointer; }
+.panel-primary:disabled, .panel-secondary:disabled { cursor: wait; opacity: .7; }
 .share-result { margin-top: 16px; }
 .share-result[hidden] { display: none; }
 .share-url-row { display: flex; overflow: hidden; border: 1px solid #becbd4; border-radius: 8px; }
@@ -236,7 +254,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .provider-page-heading { display: block; }
   .practice-environment { display: inline-block; margin-top: 12px; }
   .generation-card { width: 100%; }
-  .extension { top: 18px; right: 12px; left: 12px; width: auto; min-height: 680px; }
+  .extension { top: 18px; right: 12px; left: 12px; width: auto; height: 680px; }
   .extension::before { display: none; }
   .demo-caption { align-items: flex-start; text-align: left; }
   .why-section { margin-top: 90px; }

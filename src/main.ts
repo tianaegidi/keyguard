@@ -1,4 +1,5 @@
 import "./style.css";
+import { decryptSecret, encryptSecret } from "./crypto";
 
 type Provider = {
   name: string;
@@ -201,23 +202,52 @@ function renderDownloadAction(): void {
   actionContent.innerHTML = `
     <p class="state-kicker">Encrypted download</p>
     <h2>Lock it before saving.</h2>
-    <p class="action-description">The finished product will encrypt the key in your browser with a password before creating a <code>.keyguard</code> file.</p>
+    <p class="action-description">KeyGuard encrypts this practice key in your browser, then downloads a portable <code>.keyguard</code> file.</p>
+    <div class="crypto-recipe" aria-label="Encryption details">
+      <span><strong>AES-256-GCM</strong>Authenticated encryption</span>
+      <span><strong>PBKDF2</strong>310,000 SHA-256 rounds</span>
+      <span><strong>Local only</strong>No network request</span>
+    </div>
     <label class="panel-label" for="download-password">File password</label>
     <input id="download-password" class="panel-input" type="password" autocomplete="new-password" placeholder="Choose a strong password" />
     <label class="panel-label" for="confirm-password">Confirm password</label>
     <input id="confirm-password" class="panel-input" type="password" autocomplete="new-password" placeholder="Type it again" />
-    <button id="preview-download" class="panel-primary" type="button">Preview encrypted download</button>
-    <p id="download-status" class="panel-status" role="status">Interactive flow only—no file is created in this draft.</p>
+    <button id="create-download" class="panel-primary" type="button">Encrypt and download</button>
+    <p id="download-status" class="panel-status" role="status">Nothing is uploaded. Keep the password separate from the file.</p>
+    <div class="unlock-section">
+      <p class="unlock-heading">Prove the download works</p>
+      <p>Choose a <code>.keyguard</code> file and unlock it entirely on this device.</p>
+      <label class="file-picker" for="encrypted-file"><span id="file-picker-label">Choose encrypted file</span><input id="encrypted-file" type="file" accept=".keyguard,application/json" /></label>
+      <label class="panel-label" for="unlock-password">File password</label>
+      <input id="unlock-password" class="panel-input" type="password" autocomplete="current-password" placeholder="Enter the file password" />
+      <button id="unlock-file" class="panel-secondary" type="button">Unlock locally</button>
+      <p id="unlock-status" class="panel-status" role="status">The recovered key will stay masked.</p>
+      <div id="recovered-file" class="recovered-file" hidden>
+        <span class="recovered-check">✓</span>
+        <div><strong id="recovered-provider"></strong><small id="recovered-detail"></small></div>
+        <button id="copy-recovered" type="button">Copy key</button>
+      </div>
+    </div>
   `;
 
   const password = select<HTMLInputElement>("#download-password");
   const confirmPassword = select<HTMLInputElement>("#confirm-password");
-  const previewButton = select<HTMLButtonElement>("#preview-download");
+  const downloadButton = select<HTMLButtonElement>("#create-download");
   const status = select<HTMLElement>("#download-status");
+  const encryptedFile = select<HTMLInputElement>("#encrypted-file");
+  const filePickerLabel = select<HTMLElement>("#file-picker-label");
+  const unlockPassword = select<HTMLInputElement>("#unlock-password");
+  const unlockButton = select<HTMLButtonElement>("#unlock-file");
+  const unlockStatus = select<HTMLElement>("#unlock-status");
+  const recoveredFile = select<HTMLElement>("#recovered-file");
+  const recoveredProvider = select<HTMLElement>("#recovered-provider");
+  const recoveredDetail = select<HTMLElement>("#recovered-detail");
+  const copyRecovered = select<HTMLButtonElement>("#copy-recovered");
+  let recoveredSecret = "";
 
-  previewButton.addEventListener("click", () => {
+  downloadButton.addEventListener("click", async () => {
     if (password.value.length < 10) {
-      status.textContent = "Use at least 10 characters for this preview.";
+      status.textContent = "Use at least 10 characters to protect the file.";
       password.focus();
       return;
     }
@@ -226,10 +256,87 @@ function renderDownloadAction(): void {
       confirmPassword.focus();
       return;
     }
-    password.value = "";
-    confirmPassword.value = "";
-    status.textContent = "Preview complete: my-key.keyguard would download now, encrypted locally.";
-    previewButton.textContent = "Download preview ready ✓";
+    if (!generatedKeyInput.value) {
+      status.textContent = "The practice key is no longer available. Start the demo again.";
+      return;
+    }
+
+    downloadButton.disabled = true;
+    downloadButton.textContent = "Encrypting on this device...";
+    try {
+      const envelope = await encryptSecret(generatedKeyInput.value, currentProvider.name, password.value);
+      const blob = new Blob([JSON.stringify(envelope, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `keyguard-${new Date().toISOString().slice(0, 10)}.keyguard`;
+      link.click();
+      URL.revokeObjectURL(url);
+      password.value = "";
+      confirmPassword.value = "";
+      status.textContent = `Downloaded ${link.download}. The plaintext key was not written to the file.`;
+      downloadButton.textContent = "Encrypted file downloaded ✓";
+      showToast("Encrypted .keyguard file downloaded");
+    } catch {
+      status.textContent = "This browser could not encrypt the file. Nothing was downloaded.";
+      downloadButton.textContent = "Try encrypted download again";
+    } finally {
+      downloadButton.disabled = false;
+    }
+  });
+
+  encryptedFile.addEventListener("change", () => {
+    const file = encryptedFile.files?.[0];
+    filePickerLabel.textContent = file?.name ?? "Choose encrypted file";
+    recoveredFile.hidden = true;
+    recoveredSecret = "";
+  });
+
+  unlockButton.addEventListener("click", async () => {
+    const file = encryptedFile.files?.[0];
+    if (!file) {
+      unlockStatus.textContent = "Choose the .keyguard file you downloaded first.";
+      return;
+    }
+    if (file.size > 100_000) {
+      unlockStatus.textContent = "That file is too large to be a KeyGuard export.";
+      return;
+    }
+    if (!unlockPassword.value) {
+      unlockStatus.textContent = "Enter the password used when the file was created.";
+      unlockPassword.focus();
+      return;
+    }
+
+    unlockButton.disabled = true;
+    unlockButton.textContent = "Checking file...";
+    recoveredFile.hidden = true;
+    recoveredSecret = "";
+    try {
+      const payload = await decryptSecret(await file.text(), unlockPassword.value);
+      recoveredSecret = payload.secret;
+      recoveredProvider.textContent = payload.provider;
+      recoveredDetail.textContent = `${payload.secret.length} characters · integrity verified`;
+      recoveredFile.hidden = false;
+      unlockPassword.value = "";
+      unlockStatus.textContent = "Unlocked locally. AES-GCM also confirmed the file was not altered.";
+    } catch (error) {
+      unlockStatus.textContent = error instanceof Error ? error.message : "This file could not be unlocked.";
+    } finally {
+      unlockButton.disabled = false;
+      unlockButton.textContent = "Unlock locally";
+    }
+  });
+
+  copyRecovered.addEventListener("click", async () => {
+    if (!recoveredSecret) return;
+    try {
+      await navigator.clipboard.writeText(recoveredSecret);
+      copyRecovered.textContent = "Copied ✓";
+      showToast("Recovered practice key copied");
+    } catch {
+      unlockStatus.textContent = "Clipboard access was blocked. The key remains unlocked only in memory.";
+    }
   });
 }
 
