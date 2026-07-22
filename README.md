@@ -19,6 +19,10 @@ npm install
 npm run dev
 ```
 
+## Demo
+
+See [`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md) for the timed two-presenter walkthrough and technical talking points.
+
 ## Status
 
 The simulated provider generates only nonfunctional practice keys. Encrypted download and local unlock are functional. The one-time share panel remains an interaction preview pending backend integration.

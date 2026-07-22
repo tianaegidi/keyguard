@@ -173,7 +173,7 @@
             </article>
             <article class="product-card">
               <div class="product-mark">&gt;_</div>
-              <div><h3>Wrangler</h3><p>Generates Worker types, validates configuration, builds the project, and provides the deployment path.</p></div>
+              <div><h3>Wrangler</h3><p>Generates Worker types, validates configuration, and uploads the Worker and Vite-built assets during deployment.</p></div>
             </article>
           </div>
 
@@ -181,27 +181,42 @@
             <div class="stack-heading"><span>Full backend architecture</span><strong>NEXT</strong></div>
             <article class="product-card">
               <div class="product-mark">W</div>
-              <div><h3>Workers API</h3><p>Receives only encrypted payloads and handles create, claim, and expiration requests at the edge.</p></div>
+              <div><h3>Workers API</h3><p>Would expose create, claim, and expiration endpoints designed to accept only payloads encrypted by the browser.</p></div>
             </article>
             <article class="product-card">
               <div class="product-mark">DO</div>
-              <div><h3>Durable Objects</h3><p>Provides atomic one-time claiming, ciphertext storage, and automatic expiration so two viewers cannot reveal the same secret.</p></div>
+              <div><h3>Durable Objects</h3><p>Would route each share ID to one strongly consistent coordinator that atomically permits only its first valid claim.</p></div>
+            </article>
+            <article class="product-card compact-card">
+              <div class="product-mark">KV</div>
+              <div><h3>Workers KV</h3><p>Would hold expiring, non-authoritative share metadata for global lookup. Its eventual consistency makes it unsuitable for deciding whether a link is unused.</p></div>
+            </article>
+            <article class="product-card compact-card">
+              <div class="product-mark">R2</div>
+              <div><h3>Cloudflare R2</h3><p>Would store client-encrypted exports or larger ciphertext objects with lifecycle deletion. The application would keep passwords and plaintext in the browser.</p></div>
+            </article>
+            <article class="product-card compact-card">
+              <div class="product-mark">ZT</div>
+              <div><h3>Cloudflare Access (Zero Trust)</h3><p>Would use identity policies and service tokens to protect internal operations, support tools, and administrative endpoints.</p></div>
             </article>
             <article class="product-card compact-card">
               <div class="product-mark">T</div>
-              <div><h3>Turnstile + Rate Limiting</h3><p>Protects link creation and reveal endpoints from bots and automated abuse.</p></div>
+              <div><h3>Turnstile + Workers Rate Limiting</h3><p>Would require server-side Siteverify validation and rate-limit create and reveal endpoints to reduce automated abuse.</p></div>
+            </article>
+            <article class="product-card compact-card">
+              <div class="product-mark">SS</div>
+              <div><h3>Cloudflare Secrets Store</h3><p>Would bind KeyGuard’s operational credentials, such as the Turnstile Siteverify secret, to the Worker. It would never store captured user keys.</p></div>
             </article>
             <article class="product-card compact-card">
               <div class="product-mark">O</div>
-              <div><h3>Workers Observability</h3><p>Tracks reliability and failures while deliberately excluding keys, ciphertext, and passwords from logs.</p></div>
+              <div><h3>Workers Observability</h3><p>Would use sanitized custom logs and metrics. Sensitive values stay out of URLs and console output, with invocation logs disabled where needed.</p></div>
             </article>
           </div>
         </div>
 
         <div class="architecture-flow" aria-label="Planned encrypted sharing data flow">
-          <span><strong>01</strong>Browser encrypts</span><i>→</i><span><strong>02</strong>Worker transports ciphertext</span><i>→</i><span><strong>03</strong>Durable Object allows one claim</span><i>→</i><span><strong>04</strong>Browser decrypts</span>
+          <span><strong>01</strong>Browser encrypts</span><i>→</i><span><strong>02</strong>Worker receives ciphertext</span><i>→</i><span><strong>03</strong>KV indexes expiring metadata</span><i>→</i><span><strong>04</strong>Durable Object permits one claim</span><i>→</i><span><strong>05</strong>Browser decrypts</span>
         </div>
-        <p class="deployment-note">The public judge preview is currently delivered through GitHub Pages while Cloudflare account authentication is restored. The Worker implementation and deployment configuration are included in the repository.</p>
       </section>
     </main>
 
