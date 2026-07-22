@@ -59,12 +59,17 @@ function select<T extends Element>(selector: string): T {
   return element;
 }
 
-const keyInput = select<HTMLInputElement>("#api-key");
-const toggleKey = select<HTMLButtonElement>("#toggle-key");
-const practiceKey = select<HTMLButtonElement>("#practice-key");
-const welcomeState = select<HTMLElement>("#welcome-state");
+const generatedKeyInput = select<HTMLInputElement>("#generated-key");
+const generateKeyButton = select<HTMLButtonElement>("#generate-key");
+const providerCopyButton = select<HTMLButtonElement>("#provider-copy");
+const createKeyCard = select<HTMLElement>("#create-key-card");
+const generatedKeyCard = select<HTMLElement>("#generated-key-card");
+const extension = select<HTMLElement>("#keyguard-extension");
+const alertState = select<HTMLElement>("#alert-state");
 const detectedState = select<HTMLElement>("#detected-state");
 const actionState = select<HTMLElement>("#action-state");
+const inspectKeyButton = select<HTMLButtonElement>("#inspect-key");
+const dismissAlertButton = select<HTMLButtonElement>("#dismiss-alert");
 const providerIcon = select<HTMLElement>("#provider-icon");
 const providerName = select<HTMLElement>("#provider-name");
 const providerExplanation = select<HTMLElement>("#provider-explanation");
@@ -91,19 +96,14 @@ function showToast(message: string): void {
   toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 2800);
 }
 
-function setMainState(state: "welcome" | "detected" | "action"): void {
-  welcomeState.hidden = state !== "welcome";
+function setMainState(state: "alert" | "detected" | "action"): void {
+  alertState.hidden = state !== "alert";
   detectedState.hidden = state !== "detected";
   actionState.hidden = state !== "action";
 }
 
-function updateDetection(): void {
-  const value = keyInput.value.trim();
-  if (!value) {
-    setMainState("welcome");
-    return;
-  }
-
+function inspectGeneratedKey(): void {
+  const value = generatedKeyInput.value;
   currentProvider = detectProvider(value);
   providerName.textContent = currentProvider.name;
   providerExplanation.textContent = currentProvider.explanation;
@@ -113,13 +113,30 @@ function updateDetection(): void {
 }
 
 function clearSensitiveState(): void {
-  keyInput.value = "";
-  keyInput.type = "password";
-  toggleKey.textContent = "Show";
-  toggleKey.setAttribute("aria-label", "Show key");
+  generatedKeyInput.value = "";
   actionContent.replaceChildren();
   window.clearInterval(countdownTimer);
-  setMainState("welcome");
+  generatedKeyCard.hidden = true;
+  createKeyCard.hidden = false;
+  extension.hidden = true;
+  extension.classList.remove("is-visible");
+  generateKeyButton.textContent = "Create secret key";
+  demoShareConsumed = false;
+}
+
+function showExtensionAlert(): void {
+  setMainState("alert");
+  extension.hidden = false;
+  requestAnimationFrame(() => extension.classList.add("is-visible"));
+}
+
+function generatePracticeKey(): void {
+  generatedKeyInput.value = `sk-proj-demo_keyguard_${createDemoId()}_not_real`;
+  createKeyCard.hidden = true;
+  generatedKeyCard.hidden = false;
+  generateKeyButton.textContent = "Practice key created";
+  showExtensionAlert();
+  showToast("KeyGuard detected a newly generated secret");
 }
 
 function openAction(action: string): void {
@@ -149,7 +166,7 @@ function renderCopyAction(): void {
 
   copyButton.addEventListener("click", async () => {
     try {
-      await navigator.clipboard.writeText(keyInput.value);
+      await navigator.clipboard.writeText(generatedKeyInput.value);
       copyStatus.textContent = "Copied. Paste only into the intended secure field.";
       copyButton.textContent = "Copied";
       let seconds = 60;
@@ -291,7 +308,7 @@ function openRecipientPreview(): void {
 
 function revealDemoSecret(): void {
   demoShareConsumed = true;
-  const secret = keyInput.value;
+  const secret = generatedKeyInput.value;
   recipientContent.innerHTML = `
     <div class="recipient-icon success">✓</div>
     <p class="state-kicker">Copy it now</p>
@@ -302,19 +319,20 @@ function revealDemoSecret(): void {
   `;
 }
 
-keyInput.addEventListener("input", updateDetection);
+generateKeyButton.addEventListener("click", generatePracticeKey);
 
-practiceKey.addEventListener("click", () => {
-  keyInput.value = "sk-proj-demo_keyguard_not_a_real_credential";
-  updateDetection();
-  showToast("Nonfunctional practice key added");
+inspectKeyButton.addEventListener("click", inspectGeneratedKey);
+
+dismissAlertButton.addEventListener("click", () => {
+  extension.classList.remove("is-visible");
+  window.setTimeout(() => {
+    extension.hidden = true;
+  }, 180);
 });
 
-toggleKey.addEventListener("click", () => {
-  const reveal = keyInput.type === "password";
-  keyInput.type = reveal ? "text" : "password";
-  toggleKey.textContent = reveal ? "Hide" : "Show";
-  toggleKey.setAttribute("aria-label", reveal ? "Hide key" : "Show key");
+providerCopyButton.addEventListener("click", () => {
+  showExtensionAlert();
+  showToast("Pause—let KeyGuard prepare the key before copying");
 });
 
 document.querySelectorAll<HTMLButtonElement>(".action-button").forEach((button) => {
@@ -340,3 +358,9 @@ recipientDialog.addEventListener("click", (event) => {
 });
 
 window.addEventListener("pagehide", clearSensitiveState);
+
+const demoState = new URLSearchParams(window.location.search).get("demo");
+if (demoState === "key-created" || demoState === "key-inspected") {
+  window.setTimeout(generatePracticeKey, 350);
+  if (demoState === "key-inspected") window.setTimeout(inspectGeneratedKey, 650);
+}

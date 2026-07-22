@@ -21,8 +21,8 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
           <p class="eyebrow">API key first aid</p>
-          <h1 id="hero-title">Before you paste that key.</h1>
-          <p class="hero-summary">KeyGuard explains what you received and gives you a safer next move—without making you learn developer jargon first.</p>
+          <h1 id="hero-title">Before you copy that key.</h1>
+          <p class="hero-summary">KeyGuard notices when a website creates an API key, stops the copy-paste panic, and guides you toward a safer next move.</p>
           <div class="hero-proof" aria-label="Privacy commitments">
             <span>Zero accounts</span><span>Zero plaintext storage</span><span>Plain English</span>
           </div>
@@ -31,48 +31,70 @@
         <div class="browser-shell" aria-label="Interactive KeyGuard browser extension simulation">
           <div class="browser-tabs" aria-hidden="true">
             <div class="traffic-lights"><i></i><i></i><i></i></div>
-            <div class="browser-tab"><span class="mini-app-icon">A</span> Acme AI Builder</div>
+            <div class="browser-tab"><span class="mini-app-icon provider-tab-icon">O</span> API keys — Developer Platform</div>
             <button class="new-tab" tabindex="-1">+</button>
           </div>
           <div class="browser-toolbar" aria-hidden="true">
             <div class="nav-buttons">‹ <span>›</span> <span>↻</span></div>
-            <div class="address-bar"><span>●</span> ai-builder.example/connect</div>
+            <div class="address-bar"><span>●</span> platform.openai.example/api-keys</div>
             <div class="toolbar-icons"><span>☆</span><span>🧩</span><span class="keyguard-toolbar">K</span><span>⋮</span></div>
           </div>
 
           <div class="browser-page">
             <div class="demo-app">
               <div class="demo-app-nav">
-                <div class="demo-app-logo"><span>A</span> Acme</div>
-                <div class="avatar">JD</div>
+                <div class="demo-app-logo provider-logo"><span>O</span> Developer Platform</div>
+                <div class="provider-nav-links"><span>Docs</span><span>Usage</span><div class="avatar">JD</div></div>
               </div>
-              <div class="connection-card">
-                <div class="step-label">SETUP · STEP 2 OF 3</div>
-                <h2>Connect your AI provider</h2>
-                <p>Paste your provider key to enable image generation.</p>
-                <label for="api-key">API key</label>
-                <div class="key-input-wrap">
-                  <input id="api-key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste a practice key" aria-describedby="key-help" />
-                  <button id="toggle-key" class="input-button" type="button" aria-label="Show key">Show</button>
+              <div class="provider-layout">
+                <nav class="provider-sidebar" aria-label="Simulated provider navigation">
+                  <strong>Workspace</strong>
+                  <span>Overview</span>
+                  <span class="active">API keys</span>
+                  <span>Usage</span>
+                  <span>Billing</span>
+                </nav>
+                <div class="provider-main">
+                  <div class="provider-page-heading">
+                    <div><div class="step-label">DEVELOPER SETTINGS</div><h2>API keys</h2><p>Create a secret key for a new application.</p></div>
+                    <span class="practice-environment">Simulated website</span>
+                  </div>
+                  <div id="create-key-card" class="generation-card">
+                    <h3>Create new secret key</h3>
+                    <p>This key will be shown once. Store it somewhere secure.</p>
+                    <label for="key-name">Name</label>
+                    <input id="key-name" value="My first AI project" autocomplete="off" />
+                    <label for="key-permission">Permissions</label>
+                    <select id="key-permission"><option>All API access</option><option>Restricted</option></select>
+                    <button id="generate-key" class="generate-key" type="button">Create secret key</button>
+                  </div>
+                  <div id="generated-key-card" class="generation-card generated-key-card" hidden>
+                    <div class="generated-success"><span>✓</span><div><strong>Secret key created</strong><p>Copy it now. You will not be able to view it again.</p></div></div>
+                    <label for="generated-key">Secret key</label>
+                    <div class="generated-key-row">
+                      <input id="generated-key" readonly type="text" value="" />
+                      <button id="provider-copy" type="button">Copy</button>
+                    </div>
+                    <p class="provider-danger-note">Do not share this key or expose it in browser code.</p>
+                  </div>
                 </div>
-                <p id="key-help" class="field-help">Not ready to use a key? Try the safe practice example.</p>
-                <button id="practice-key" class="practice-button" type="button">Use a practice key</button>
-                <button class="fake-connect" type="button" disabled>Connect provider</button>
               </div>
             </div>
 
-            <aside class="extension" aria-label="KeyGuard extension popup">
+            <aside id="keyguard-extension" class="extension" aria-label="KeyGuard extension popup" hidden>
               <div class="extension-header">
                 <div class="extension-brand"><span class="brand-mark small">K</span><strong>KeyGuard</strong></div>
                 <span class="prototype-badge">Interactive draft</span>
               </div>
 
-              <div id="welcome-state" class="extension-state">
-                <div class="first-aid-symbol" aria-hidden="true"><span></span><span></span></div>
-                <p class="state-kicker">You just got an API key.</p>
-                <h2>Let’s keep it safe.</h2>
-                <p>Paste a practice key in the page. KeyGuard will recognize it without sending it anywhere.</p>
-                <div class="local-note"><span aria-hidden="true">✓</span> Detection happens in this browser</div>
+              <div id="alert-state" class="extension-state alert-state">
+                <div class="stop-symbol" aria-hidden="true">!</div>
+                <p class="state-kicker">New secret detected</p>
+                <h2>Pause before you copy.</h2>
+                <p>This page just created an API key. Don’t paste it into Slack, email, a screenshot, or frontend code.</p>
+                <div class="intercept-note"><span aria-hidden="true">K</span><div><strong>Let KeyGuard handle it first.</strong><small>We’ll explain what it is and help you export it safely.</small></div></div>
+                <button id="inspect-key" class="panel-primary intercept-button" type="button">Open safely in KeyGuard</button>
+                <button id="dismiss-alert" class="text-button" type="button">Not now</button>
               </div>
 
               <div id="detected-state" class="extension-state" hidden>
@@ -82,9 +104,11 @@
                 </div>
 
                 <div class="plain-warning">
-                  <strong>This is both a password and a spending credential.</strong>
+                  <strong>This is a password with spending access.</strong>
                   <p id="provider-explanation">Anyone who gets it may be able to use your account—and leave you with the bill.</p>
                 </div>
+
+                <div class="safe-use-note"><strong>What to do:</strong><span>Keep it out of browser code. Save it encrypted or hand it off once.</span></div>
 
                 <div class="never-list">
                   <p>Never put the original in:</p>
@@ -95,13 +119,13 @@
                   </ul>
                 </div>
 
-                <div class="action-label">Choose a safer next move</div>
+                <div class="action-label">Export it safely</div>
                 <div class="action-buttons">
                   <button class="action-button" data-action="copy" type="button"><span class="action-icon">⧉</span><span><strong>Copy once</strong><small>With a clipboard reminder</small></span><span>›</span></button>
-                  <button class="action-button" data-action="download" type="button"><span class="action-icon">↓</span><span><strong>Encrypted file</strong><small>Lock it with a password</small></span><span>›</span></button>
-                  <button class="action-button primary" data-action="share" type="button"><span class="action-icon">↗</span><span><strong>Share once</strong><small>One view, then it’s gone</small></span><span>›</span></button>
+                  <button class="action-button primary" data-action="download" type="button"><span class="action-icon">↓</span><span><strong>Encrypted file</strong><small>Lock it with a password</small></span><span>›</span></button>
+                  <button class="action-button" data-action="share" type="button"><span class="action-icon">↗</span><span><strong>Share once</strong><small>One view, then it’s gone</small></span><span>›</span></button>
                 </div>
-                <button id="start-over" class="text-button" type="button">Clear key and start over</button>
+                <button id="start-over" class="text-button" type="button">Destroy practice key and restart</button>
               </div>
 
               <div id="action-state" class="extension-state" hidden>
@@ -109,18 +133,18 @@
                 <div id="action-content"></div>
               </div>
 
-              <div class="extension-footer"><span class="local-pulse" aria-hidden="true"></span><span>Nothing entered here is transmitted</span></div>
+              <div class="extension-footer"><span class="local-pulse" aria-hidden="true"></span><span>Practice key remains on this device</span></div>
             </aside>
           </div>
         </div>
 
-        <p class="demo-caption"><span>TRY IT</span> Select “Use a practice key,” then test each KeyGuard action.</p>
+        <p class="demo-caption"><span>TRY IT</span> Select “Create secret key” and watch KeyGuard intervene.</p>
       </section>
 
       <section class="why-section" aria-labelledby="why-title">
         <div>
           <p class="eyebrow">The missed moment</p>
-          <h2 id="why-title">Security tools arrive after the mistake. KeyGuard arrives before the paste.</h2>
+          <h2 id="why-title">Security tools arrive after the leak. KeyGuard appears when the key does.</h2>
         </div>
         <div class="principles">
           <article><span>01</span><h3>Recognize</h3><p>Identify common providers from the key format, locally.</p></article>

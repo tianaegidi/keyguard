@@ -1,6 +1,6 @@
 # KeyGuard
 
-API key first aid for non-technical employees. This repository currently contains an interactive browser-extension simulation for design review.
+API key first aid for non-technical employees. This repository contains an interactive browser-extension simulation that intervenes when a provider generates a new API key.
 
 ## Privacy posture
 
@@ -19,4 +19,4 @@ npm run dev
 
 ## Status
 
-The encrypted download and one-time share panels are interaction previews. Backend integration begins after the visual review checkpoint.
+The simulated provider generates only nonfunctional practice keys. The encrypted download and one-time share panels remain interaction previews pending backend integration.
